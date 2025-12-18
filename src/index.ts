@@ -184,7 +184,7 @@ const ZiweiLiuRiListSchema = BaseBirthInfoSchema.extend({
 const server = new Server(
   {
     name: "mingpan",
-    version: "0.1.0",
+    version: "0.1.1",
   },
   {
     capabilities: {
@@ -1365,7 +1365,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info("Mingpan MCP server started (v0.1.0)");
+  logger.info("Mingpan MCP server started (v0.1.1)");
 }
 
 main().catch((error) => {
