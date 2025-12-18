@@ -1,0 +1,54 @@
+{
+  "name": "mingpan",
+  "version": "0.1.0",
+  "description": "MCP service for accurate Bazi and Ziwei chart calculations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mingpan": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChesterRa/mingpan.git"
+  },
+  "homepage": "https://github.com/ChesterRa/mingpan#readme",
+  "bugs": {
+    "url": "https://github.com/ChesterRa/mingpan/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "bazi",
+    "ziwei",
+    "fortune-telling",
+    "chinese-astrology",
+    "model-context-protocol"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "iztro": "^2.5.0",
+    "lunar-javascript": "^1.7.3",
+    "zod": "^3.23.0",
+    "zod-to-json-schema": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "typescript": "^5.3.3",
+    "vitest": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
