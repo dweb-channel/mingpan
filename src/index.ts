@@ -29,6 +29,8 @@ import { MeihuaService } from "./services/meihua/MeihuaService";
 import { renderMeihuaText } from "./output/meihuaTextRenderer";
 import { DaliurenService } from "./services/daliuren/DaliurenService";
 import { renderDaliurenText } from "./output/daliurenTextRenderer";
+import { QimenService } from "./services/qimen/QimenService";
+import { renderQimenText } from "./output/qimenTextRenderer";
 import { LiuNianCalculator } from "./services/bazi/calculators/LiuNianCalculator";
 import { DaYunCalculator } from "./services/bazi/calculators/DaYunCalculator";
 import { LuckCycleCalculator } from "./services/bazi/calculators/LuckCycleCalculator";
@@ -217,6 +219,21 @@ const DaliurenBasicSchema = z.object({
   dayGanZhi: z.string().describe("日干支（如：甲子、乙丑等）"),
   hourGanZhi: z.string().describe("時干支（如：甲子、乙丑等）"),
   guirenMethod: z.union([z.literal(0), z.literal(1)]).optional().default(0).describe("貴人起法：0=標準, 1=另一種"),
+});
+
+// ============================================
+// 奇門遁甲 Schema
+// ============================================
+
+const QimenBasicSchema = z.object({
+  year: z.number().int().min(1900).max(2100).describe("年份（公曆，1900-2100）"),
+  month: z.number().int().min(1).max(12).describe("月份（1-12）"),
+  day: z.number().int().min(1).max(31).describe("日期（1-31）"),
+  hour: z.number().int().min(0).max(23).describe("時辰（0-23，24小時制）"),
+  minute: z.number().int().min(0).max(59).optional().default(0).describe("分鐘（0-59）"),
+  isLunar: isLunarField,
+  panType: z.enum(['时盘', '日盘']).optional().default('时盘').describe("盤類型：时盘（默認）或日盘"),
+  zhiRunMethod: z.enum(['chaibu', 'maoshan']).optional().default('chaibu').describe("置閏方法：chaibu=拆補法（默認），maoshan=茅山法"),
 });
 
 // ============================================
@@ -543,6 +560,29 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 輸出為 Markdown 格式，便於 AI 分析解讀。`,
         inputSchema: schemaToJson(DaliurenBasicSchema),
       },
+      {
+        name: "qimen_basic",
+        description: `奇門遁甲排盤（基礎排盤）。
+
+奇門遁甲是中國古代三式之一，與大六壬、太乙神數並稱，用於預測和決策。
+
+輸入時間信息，返回完整的奇門盤面：
+- 陰陽遁和局數（根據節氣判定）
+- 九宮布局（地盤干、天盤干）
+- 八門飛布（休、生、傷、杜、景、死、驚、開）
+- 九星飛布（天蓬、天芮、天沖、天輔、天禽、天心、天柱、天任、天英）
+- 八神排布（值符、螣蛇、太陰、六合、白虎、玄武、九地、九天）
+- 旬首信息（符頭、值符星、值使門、空亡）
+- 日干/時干落宮
+- 格局判斷（吉格/凶格約20-30種）
+
+支持選項：
+- 盤類型：時盤（默認）或日盤
+- 置閏法：拆補法（默認）或茅山法
+
+輸出為 Markdown 格式，含 ASCII 九宮格，便於 AI 分析解讀。`,
+        inputSchema: schemaToJson(QimenBasicSchema),
+      },
     ],
   };
 });
@@ -786,7 +826,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === "daliuren_basic") {
       const validated = DaliurenBasicSchema.parse(args);
-      
+
       const daliurenService = new DaliurenService();
       const result = daliurenService.calculate({
         jieqi: validated.jieqi,
@@ -797,6 +837,35 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       });
 
       const text = renderDaliurenText(result);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text,
+          },
+        ],
+      };
+    }
+
+    // === 奇門遁甲工具處理器 ===
+
+    if (name === "qimen_basic") {
+      const validated = QimenBasicSchema.parse(args);
+
+      const qimenService = new QimenService();
+      const result = qimenService.calculate({
+        year: validated.year,
+        month: validated.month,
+        day: validated.day,
+        hour: validated.hour,
+        minute: validated.minute,
+        isLunar: validated.isLunar,
+        panType: validated.panType,
+        zhiRunMethod: validated.zhiRunMethod,
+      });
+
+      const text = renderQimenText(result);
 
       return {
         content: [
