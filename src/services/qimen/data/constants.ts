@@ -1,18 +1,42 @@
 /**
  * 奇门遁甲常量数据
+ *
+ * 注意：飞宫规则、九宫映射、阴阳遁计算等核心逻辑已迁移到 core/qimen/
+ * 本文件重新导出核心常量，并保留奇门业务专用常量
  */
 
 import type {
   TianGan,
   DiZhi,
   GongWei,
-  JuShu,
   BaMen,
   JiuXing,
   BaShen,
   WuXing,
   YuanType,
 } from '../types';
+
+// ============= 从 core/qimen 重新导出 =============
+
+export {
+  // Flying rules
+  LUOSHU_ORDER,
+  ZHONG_GONG_JI,
+  getLuoShuIndex,
+  getLuoShuGong,
+  flyForward,
+  flyBackward,
+  // Gong mappings
+  GONG_NAMES,
+  GONG_WUXING,
+  DI_ZHI_GONG,
+  CHONG_GONG_MAP,
+  GAN_HE_MAP,
+  // Yin-Yang Dun
+  JIEQI_JU_MAP,
+  getYinYangDun,
+  getJuShu,
+} from '../../../core/qimen';
 
 // ============= 天干地支序列 =============
 
@@ -72,50 +96,6 @@ export const XUN_KONG: Record<string, [DiZhi, DiZhi]> = {
   '甲辰': ['寅', '卯'],
   '甲寅': ['子', '丑'],
 };
-
-// ============= 九宫信息 =============
-
-/**
- * 九宫名称 (洛书顺序)
- * 1-坎、2-坤、3-震、4-巽、5-中、6-乾、7-兑、8-艮、9-离
- */
-export const GONG_NAMES: Record<GongWei, string> = {
-  1: '坎',
-  2: '坤',
-  3: '震',
-  4: '巽',
-  5: '中',
-  6: '乾',
-  7: '兑',
-  8: '艮',
-  9: '离',
-};
-
-/**
- * 九宫五行
- */
-export const GONG_WUXING: Record<GongWei, WuXing> = {
-  1: '水', // 坎
-  2: '土', // 坤
-  3: '木', // 震
-  4: '木', // 巽
-  5: '土', // 中
-  6: '金', // 乾
-  7: '金', // 兑
-  8: '土', // 艮
-  9: '火', // 离
-};
-
-/**
- * 洛书飞布顺序 (顺飞)
- * 从任意宫开始，按此顺序飞布
- */
-export const LUOSHU_ORDER: GongWei[] = [1, 8, 3, 4, 9, 2, 7, 6];
-
-/**
- * 中宫寄宫 (天禽寄坤二)
- */
-export const ZHONG_GONG_JI: GongWei = 2;
 
 // ============= 八门 =============
 
@@ -206,41 +186,7 @@ export const BA_SHEN_FULL: Record<BaShen, string> = {
   '天': '九天',
 };
 
-// ============= 节气局数映射 =============
-
-/**
- * 节气 -> [阳遁/阴遁, [上元局, 中元局, 下元局]]
- * 阳遁：冬至 -> 夏至前
- * 阴遁：夏至 -> 冬至前
- */
-export const JIEQI_JU_MAP: Record<string, { dun: '阳遁' | '阴遁'; ju: [JuShu, JuShu, JuShu] }> = {
-  // 阳遁（冬至后）
-  '冬至': { dun: '阳遁', ju: [1, 7, 4] },
-  '小寒': { dun: '阳遁', ju: [2, 8, 5] },
-  '大寒': { dun: '阳遁', ju: [3, 9, 6] },
-  '立春': { dun: '阳遁', ju: [8, 5, 2] },
-  '雨水': { dun: '阳遁', ju: [9, 6, 3] },
-  '惊蛰': { dun: '阳遁', ju: [1, 7, 4] },
-  '春分': { dun: '阳遁', ju: [3, 9, 6] },
-  '清明': { dun: '阳遁', ju: [4, 1, 7] },
-  '谷雨': { dun: '阳遁', ju: [5, 2, 8] },
-  '立夏': { dun: '阳遁', ju: [4, 1, 7] },
-  '小满': { dun: '阳遁', ju: [5, 2, 8] },
-  '芒种': { dun: '阳遁', ju: [6, 3, 9] },
-  // 阴遁（夏至后）
-  '夏至': { dun: '阴遁', ju: [9, 3, 6] },
-  '小暑': { dun: '阴遁', ju: [8, 2, 5] },
-  '大暑': { dun: '阴遁', ju: [7, 1, 4] },
-  '立秋': { dun: '阴遁', ju: [2, 5, 8] },
-  '处暑': { dun: '阴遁', ju: [1, 4, 7] },
-  '白露': { dun: '阴遁', ju: [9, 3, 6] },
-  '秋分': { dun: '阴遁', ju: [7, 1, 4] },
-  '寒露': { dun: '阴遁', ju: [6, 9, 3] },
-  '霜降': { dun: '阴遁', ju: [5, 8, 2] },
-  '立冬': { dun: '阴遁', ju: [6, 9, 3] },
-  '小雪': { dun: '阴遁', ju: [5, 8, 2] },
-  '大雪': { dun: '阴遁', ju: [4, 7, 1] },
-};
+// ============= 其他奇门专用常量 =============
 
 /**
  * 符头表：根据日干支确定属于哪个旬
@@ -259,24 +205,6 @@ export const FU_TOU_MAP: Record<string, string> = (() => {
 
   return map;
 })();
-
-/**
- * 地支 -> 宫位映射
- */
-export const DI_ZHI_GONG: Record<DiZhi, GongWei> = {
-  '子': 1,
-  '丑': 8,
-  '寅': 8,
-  '卯': 3,
-  '辰': 4,
-  '巳': 4,
-  '午': 9,
-  '未': 2,
-  '申': 2,
-  '酉': 7,
-  '戌': 6,
-  '亥': 6,
-};
 
 /**
  * 天干五行
@@ -314,40 +242,6 @@ export const MA_XING: Record<DiZhi, DiZhi> = {
 };
 
 // ============= 辅助函数 =============
-
-/**
- * 根据宫位获取飞布顺序中的索引
- */
-export function getLuoShuIndex(gong: GongWei): number {
-  if (gong === 5) return -1; // 中宫不在飞布顺序中
-  return LUOSHU_ORDER.indexOf(gong);
-}
-
-/**
- * 根据索引获取飞布宫位
- */
-export function getLuoShuGong(index: number): GongWei {
-  const normalizedIndex = ((index % 8) + 8) % 8;
-  return LUOSHU_ORDER[normalizedIndex];
-}
-
-/**
- * 顺飞：从某宫开始顺时针飞布
- */
-export function flyForward(startGong: GongWei, steps: number): GongWei {
-  if (startGong === 5) startGong = ZHONG_GONG_JI; // 中宫寄坤二
-  const startIdx = getLuoShuIndex(startGong);
-  return getLuoShuGong(startIdx + steps);
-}
-
-/**
- * 逆飞：从某宫开始逆时针飞布
- */
-export function flyBackward(startGong: GongWei, steps: number): GongWei {
-  if (startGong === 5) startGong = ZHONG_GONG_JI; // 中宫寄坤二
-  const startIdx = getLuoShuIndex(startGong);
-  return getLuoShuGong(startIdx - steps);
-}
 
 /**
  * 根据干支获取旬首

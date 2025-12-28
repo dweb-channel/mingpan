@@ -13,7 +13,12 @@ import type {
   YinYangDun,
   BaMen,
 } from '../types';
-import { getLiuYiGan } from '../data/constants';
+import {
+  getLiuYiGan,
+  DI_ZHI_GONG,
+  CHONG_GONG_MAP,
+  GAN_HE_MAP,
+} from '../data/constants';
 
 /**
  * 格局计算器
@@ -39,7 +44,7 @@ export class GeJuCalculator {
     geJuList.push(...this.checkRuMuGeJu(gongs));
     geJuList.push(...this.checkJiXingGeJu(gongs));
     geJuList.push(...this.checkWuBuYuShiGeJu(dayGan, hourGan));
-    geJuList.push(...this.checkFuYinFanYinGeJu(gongs, xunShou));
+    geJuList.push(...this.checkFuYinGeJu(gongs, xunShou));
     geJuList.push(...this.checkQingLongTaoGeJu(gongs));
     geJuList.push(...this.checkBaiHuChangKuangGeJu(gongs));
 
@@ -349,7 +354,7 @@ export class GeJuCalculator {
   /**
    * 伏吟/反吟格局
    */
-  private static checkFuYinFanYinGeJu(
+  private static checkFuYinGeJu(
     gongs: Record<GongWei, GongInfo>,
     xunShou: XunShouInfo
   ): GeJuInfo[] {
@@ -439,54 +444,6 @@ export class GeJuCalculator {
   // ============= 新增格局检测方法 =============
 
   /**
-   * 宫位冲对映射表
-   */
-  private static readonly CHONG_GONG_MAP: Record<GongWei, GongWei> = {
-    1: 9, // 坎 ↔ 离
-    9: 1,
-    3: 7, // 震 ↔ 兑
-    7: 3,
-    4: 6, // 巽 ↔ 乾
-    6: 4,
-    2: 8, // 坤 ↔ 艮
-    8: 2,
-    5: 5, // 中宫无对冲
-  };
-
-  /**
-   * 时支对应宫位映射表
-   */
-  private static readonly DI_ZHI_GONG_MAP: Record<DiZhi, GongWei> = {
-    '子': 1, // 坎
-    '丑': 8, // 艮
-    '寅': 8, // 艮
-    '卯': 3, // 震
-    '辰': 4, // 巽
-    '巳': 4, // 巽
-    '午': 9, // 离
-    '未': 2, // 坤
-    '申': 2, // 坤
-    '酉': 7, // 兑
-    '戌': 6, // 乾
-    '亥': 6, // 乾
-  };
-
-  /**
-   * 天干五合映射表（奇仪相合）
-   * 注：甲己合不在此表中，因为甲遁于六仪，不会出现在盘面上
-   */
-  private static readonly GAN_HE_MAP: Partial<Record<TianGan, TianGan>> = {
-    '乙': '庚',
-    '庚': '乙',
-    '丙': '辛',
-    '辛': '丙',
-    '丁': '壬',
-    '壬': '丁',
-    '戊': '癸',
-    '癸': '戊',
-  };
-
-  /**
    * 反吟格局检测
    */
   private static checkFanYinGeJu(
@@ -496,7 +453,7 @@ export class GeJuCalculator {
     const results: GeJuInfo[] = [];
 
     // 星反吟：值符星落对宫
-    const zhiFuChongGong = this.CHONG_GONG_MAP[xunShou.zhiFuGong];
+    const zhiFuChongGong = CHONG_GONG_MAP[xunShou.zhiFuGong];
     if (zhiFuChongGong && xunShou.zhiFuLuoGong === zhiFuChongGong) {
       results.push({
         name: '星反吟',
@@ -507,7 +464,7 @@ export class GeJuCalculator {
     }
 
     // 门反吟：值使门落对宫
-    const zhiShiChongGong = this.CHONG_GONG_MAP[xunShou.zhiShiGong];
+    const zhiShiChongGong = CHONG_GONG_MAP[xunShou.zhiShiGong];
     if (zhiShiChongGong && xunShou.zhiShiLuoGong === zhiShiChongGong) {
       results.push({
         name: '门反吟',
@@ -522,7 +479,7 @@ export class GeJuCalculator {
     let fanYinCount = 0;
     for (const gong of Object.values(gongs)) {
       if (gong.gong === 5) continue; // 跳过中宫
-      const chongGong = this.CHONG_GONG_MAP[gong.gong];
+      const chongGong = CHONG_GONG_MAP[gong.gong];
       if (chongGong && chongGong !== 5) {
         // 获取对冲宫的地盘干
         const chongGongInfo = gongs[chongGong];
@@ -570,7 +527,7 @@ export class GeJuCalculator {
       const diGan = gong.diPanGan;
 
       // 检查天盘干与地盘干是否相合
-      if (this.GAN_HE_MAP[tianGan] === diGan) {
+      if (GAN_HE_MAP[tianGan] === diGan) {
         const heName = `${tianGan}${diGan}合`;
         results.push({
           name: heName,
@@ -655,7 +612,7 @@ export class GeJuCalculator {
     const sanQi: TianGan[] = ['乙', '丙', '丁'];
     const jiMen: BaMen[] = ['开', '休', '生'];
 
-    const hourGong = this.DI_ZHI_GONG_MAP[hourZhi];
+    const hourGong = DI_ZHI_GONG[hourZhi];
 
     for (const gong of Object.values(gongs)) {
       if (gong.gong !== hourGong) continue;
@@ -685,7 +642,7 @@ export class GeJuCalculator {
     const liuYi: TianGan[] = ['戊', '己', '庚', '辛', '壬', '癸'];
     const xiongMen: BaMen[] = ['死', '惊', '杜'];
 
-    const hourGong = this.DI_ZHI_GONG_MAP[hourZhi];
+    const hourGong = DI_ZHI_GONG[hourZhi];
 
     for (const gong of Object.values(gongs)) {
       if (gong.gong !== hourGong) continue;
