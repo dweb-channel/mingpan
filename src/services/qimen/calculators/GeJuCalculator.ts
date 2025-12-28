@@ -25,6 +25,7 @@ import {
   DI_ZHI_GONG,
   CHONG_GONG_MAP,
   GAN_HE_MAP,
+  QI_YI_GEJU_MAP,
 } from '../data/constants';
 
 /**
@@ -46,6 +47,8 @@ export class GeJuCalculator {
 
     // 检查各类格局
     geJuList.push(...this.checkSanQiGeJu(gongs));
+    geJuList.push(...this.checkSanQiDeMenGeJu(gongs));
+    geJuList.push(...this.checkYuNuShouMenGeJu(gongs));
     geJuList.push(...this.checkJiuDunGeJu(gongs));
     geJuList.push(...this.checkMenPoGeJu(gongs));
     geJuList.push(...this.checkRuMuGeJu(gongs));
@@ -56,6 +59,7 @@ export class GeJuCalculator {
     geJuList.push(...this.checkBaiHuChangKuangGeJu(gongs));
 
     // 新增格局检测
+    geJuList.push(...this.checkQiYiZuHeGeJu(gongs)); // 奇仪组合格局（核心）
     geJuList.push(...this.checkFanYinGeJu(gongs, xunShou));
     geJuList.push(...this.checkQiYiXiangHeGeJu(gongs));
     geJuList.push(...this.checkFeiGanFuGanGeJu(gongs, dayGan, hourGan, xunShou));
@@ -94,6 +98,65 @@ export class GeJuCalculator {
           description: `${gong.tianPanGan}奇遇值符于${gong.gongName}宫`,
           gongs: [gong.gong],
         });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * 三奇得门格局（吉格）
+   * 比三奇得使更精确：乙配开门、丙配生门、丁配休门
+   *
+   * 口诀：乙奇开门最为良，丙奇生门福禄昌，丁奇休门多吉庆
+   */
+  private static checkSanQiDeMenGeJu(gongs: Record<GongWei, GongInfo>): GeJuInfo[] {
+    const results: GeJuInfo[] = [];
+
+    // 三奇得门的精确配对
+    const sanQiMenPair: Partial<Record<TianGan, BaMen>> = {
+      '乙': '开', // 乙奇配开门
+      '丙': '生', // 丙奇配生门
+      '丁': '休', // 丁奇配休门
+    };
+
+    for (const gong of Object.values(gongs)) {
+      const expectedMen = sanQiMenPair[gong.tianPanGan as keyof typeof sanQiMenPair];
+      if (expectedMen && gong.men === expectedMen) {
+        results.push({
+          name: '三奇得门',
+          type: '吉格',
+          description: `${gong.tianPanGan}奇得${gong.men}门于${gong.gongName}宫`,
+          gongs: [gong.gong],
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * 玉女守门格局（吉格）
+   * 丁奇临开门或休门，且遇太阴或六合
+   *
+   * 主阴人暗助、贵人相扶，利于谋事求人
+   */
+  private static checkYuNuShouMenGeJu(gongs: Record<GongWei, GongInfo>): GeJuInfo[] {
+    const results: GeJuInfo[] = [];
+
+    for (const gong of Object.values(gongs)) {
+      // 丁奇临开门或休门
+      if (gong.tianPanGan === '丁' && (gong.men === '开' || gong.men === '休')) {
+        // 且遇太阴或六合
+        if (gong.shen === '阴' || gong.shen === '合') {
+          const shenName = gong.shen === '阴' ? '太阴' : '六合';
+          results.push({
+            name: '玉女守门',
+            type: '吉格',
+            description: `丁奇临${gong.men}门遇${shenName}于${gong.gongName}宫`,
+            gongs: [gong.gong],
+          });
+        }
       }
     }
 
@@ -449,6 +512,34 @@ export class GeJuCalculator {
   }
 
   // ============= 新增格局检测方法 =============
+
+  /**
+   * 奇仪组合格局检测（断卦核心）
+   * 检测天盘干+地盘干的特定组合
+   *
+   * 包含22种格局：
+   * - 吉格8种：青龙返首、飞鸟跌穴、丁遇戊格、日月会合等
+   * - 凶格14种：青龙折足、白虎猖狂、朱雀投江、大格、小格等
+   */
+  private static checkQiYiZuHeGeJu(gongs: Record<GongWei, GongInfo>): GeJuInfo[] {
+    const results: GeJuInfo[] = [];
+
+    for (const gong of Object.values(gongs)) {
+      // 遍历奇仪组合格局映射表
+      for (const geJuDef of QI_YI_GEJU_MAP) {
+        if (gong.tianPanGan === geJuDef.tianGan && gong.diPanGan === geJuDef.diGan) {
+          results.push({
+            name: geJuDef.name,
+            type: geJuDef.type,
+            description: `${geJuDef.description}，于${gong.gongName}宫`,
+            gongs: [gong.gong],
+          });
+        }
+      }
+    }
+
+    return results;
+  }
 
   /**
    * 反吟格局检测

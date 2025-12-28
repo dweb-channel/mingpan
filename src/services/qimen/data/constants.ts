@@ -241,6 +241,66 @@ export const MA_XING: Record<DiZhi, DiZhi> = {
   '丑': '亥',
 };
 
+// ============= 奇仪组合格局 =============
+
+/**
+ * 奇仪组合格局定义
+ * 天盘干 + 地盘干 的特定组合产生的吉凶格局
+ *
+ * 注意：甲不上盘，甲遁于六仪，故不检测甲
+ */
+export interface QiYiGeJuDef {
+  tianGan: TianGan;   // 天盘干
+  diGan: TianGan;     // 地盘干
+  name: string;       // 格局名称
+  type: '吉格' | '凶格';
+  description: string;
+}
+
+/**
+ * 奇仪组合格局映射表
+ */
+export const QI_YI_GEJU_MAP: QiYiGeJuDef[] = [
+  // ========== 吉格（8种） ==========
+  { tianGan: '乙', diGan: '戊', name: '青龙返首', type: '吉格', description: '乙奇临戊，龙归故里' },
+  { tianGan: '丙', diGan: '戊', name: '飞鸟跌穴', type: '吉格', description: '丙奇临戊，鸟归巢穴' },
+  { tianGan: '丁', diGan: '戊', name: '丁遇戊格', type: '吉格', description: '丁奇临戊，玉女守护' },
+  { tianGan: '丙', diGan: '乙', name: '日月会合', type: '吉格', description: '丙临乙，日月相会' },
+  { tianGan: '丁', diGan: '乙', name: '奇仪相佐', type: '吉格', description: '丁临乙，星月相辉' },
+  { tianGan: '乙', diGan: '丙', name: '日月并行', type: '吉格', description: '乙临丙，阴阳和合' },
+  { tianGan: '丁', diGan: '丙', name: '星奇朱雀', type: '吉格', description: '丁临丙，星辉日出' },
+  { tianGan: '丁', diGan: '丁', name: '星奇入太', type: '吉格', description: '丁奇伏吟，可断隐私事' },
+
+  // ========== 伏吟格局（6种，中性偏吉/凶视情况） ==========
+  { tianGan: '乙', diGan: '乙', name: '乙奇伏吟', type: '吉格', description: '乙奇自临，主隐私阴谋' },
+  { tianGan: '丙', diGan: '丙', name: '丙奇伏吟', type: '吉格', description: '丙奇自临，光明正大' },
+  { tianGan: '戊', diGan: '戊', name: '戊仪伏吟', type: '凶格', description: '戊仪自临，财物不动' },
+  { tianGan: '己', diGan: '己', name: '己仪伏吟', type: '凶格', description: '己仪自临，主私昧纠缠' },
+  { tianGan: '壬', diGan: '壬', name: '壬仪伏吟', type: '凶格', description: '壬仪自临，流动停滞' },
+  { tianGan: '癸', diGan: '癸', name: '癸仪伏吟', type: '凶格', description: '癸仪自临，阴私暗昧' },
+
+  // ========== 凶格（22种） ==========
+  { tianGan: '乙', diGan: '辛', name: '青龙折足', type: '凶格', description: '乙遇辛，金克木' },
+  { tianGan: '辛', diGan: '乙', name: '白虎逢星', type: '凶格', description: '辛临乙，金克木' }, // 避免与"庚+开+虎"的白虎猖狂混淆
+  { tianGan: '丁', diGan: '癸', name: '朱雀投江', type: '凶格', description: '丁遇癸，水克火' },
+  { tianGan: '癸', diGan: '丁', name: '腾蛇夭矫', type: '凶格', description: '癸临丁，水火相战' },
+  { tianGan: '庚', diGan: '丙', name: '太白入荧', type: '凶格', description: '庚临丙，金入火乡' },
+  { tianGan: '丙', diGan: '庚', name: '荧入太白', type: '凶格', description: '丙临庚，火入金地' },
+  { tianGan: '庚', diGan: '癸', name: '大格', type: '凶格', description: '庚临癸，阻滞严重' },
+  { tianGan: '庚', diGan: '壬', name: '小格', type: '凶格', description: '庚临壬，小有阻碍' },
+  { tianGan: '庚', diGan: '庚', name: '刑格', type: '凶格', description: '庚金伏吟，主刑伤' },
+  { tianGan: '戊', diGan: '庚', name: '戊加庚格', type: '凶格', description: '甲首遇庚，主悖逆' },
+  { tianGan: '己', diGan: '庚', name: '己加庚格', type: '凶格', description: '甲首遇庚，主悖逆' },
+  { tianGan: '壬', diGan: '庚', name: '飞宫格', type: '凶格', description: '壬临庚，飞扬跋扈' },
+  { tianGan: '癸', diGan: '庚', name: '伏宫格', type: '凶格', description: '癸临庚，阴私暗害' },
+  { tianGan: '癸', diGan: '戊', name: '地网高张', type: '凶格', description: '癸临戊，地网笼罩' },
+  // 补充庚/辛相关格局
+  { tianGan: '庚', diGan: '乙', name: '庚加乙格', type: '凶格', description: '庚临乙，金克木，主官非口舌' },
+  { tianGan: '庚', diGan: '丁', name: '庚加丁格', type: '凶格', description: '庚临丁，金夺火气，主文书阻滞' },
+  { tianGan: '辛', diGan: '丙', name: '辛加丙格', type: '凶格', description: '辛临丙，金被火炼，主损耗变化' },
+  { tianGan: '辛', diGan: '丁', name: '辛加丁格', type: '凶格', description: '辛临丁，阴金遇阴火，主暗昧是非' },
+];
+
 // ============= 辅助函数 =============
 
 /**
