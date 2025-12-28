@@ -35,3 +35,8 @@ test/results/
 
 .venv/
 test/
+
+# Openspec
+openspec
+AGENTS.md
+CLAUDE.md
