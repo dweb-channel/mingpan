@@ -130,6 +130,7 @@ export class QimenService {
       yinYangDun,
       siZhu.dayGan,
       siZhu.hourGan,
+      siZhu.hourZhi,
       xunShouInfo
     );
 
